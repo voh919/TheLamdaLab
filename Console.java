@@ -1,4 +1,4 @@
-
+// λ
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -20,7 +20,9 @@ public class Console {
 			
 			ArrayList<String> tokens = lexer.tokenize(input);
 
-			System.out.println(tokens.toString());
+			//preparse
+
+			System.out.println(Parser.preParse(tokens));
 
 			String output = "";
 			
