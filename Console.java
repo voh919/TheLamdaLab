@@ -31,10 +31,10 @@ public class Console {
                 // PART 4: Tokenize input
                 ArrayList<String> tokens = lexer.tokenize(input);
 
-                // PART 5: Parse expression from tokens
+                //PART 5: Parse expression from tokens
                 Expression expression = parser.parse(tokens);
 
-                // PART 6: Evaluate or display result
+                //PART 6: Evaluate or display result
                 System.out.println(expression.toString());
 
             } catch (Exception e) {

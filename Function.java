@@ -9,6 +9,6 @@ public class Function implements Expression {
 
     @Override
     public String toString() {
-        return "λ" + parameter + "." + body.toString();
+        return "(λ" + parameter.toString() + "." + body.toString() + ")";
     }
 }
