@@ -6,41 +6,46 @@ import java.util.regex.Pattern;
 
 
 public class Console {
-	private static Scanner in;
-	
-	public static void main(String[] args) {
-		in = new Scanner (System.in);
-		
-		Lexer lexer = new Lexer();
-		Parser parser = new Parser();
-		
-		String input = cleanConsoleInput();  // see comment
-		
-		while (! input.equalsIgnoreCase("exit")) {
-			
-			ArrayList<String> tokens = lexer.tokenize(input);
 
-			//preparse
+    // Scanner for user input
+    private static Scanner in = new Scanner(System.in);
 
-			System.out.println(Parser.preParse(tokens));
+    public static void main(String[] args) {
 
-			String output = "";
-			
-			try {
-				Expression exp = parser.parse(tokens);
-				output = exp.toString();
-			} catch (Exception e) {
-				System.out.println("Unparsable expression, input was: \"" + input + "\"");
-				input = cleanConsoleInput();
-				continue;
-			}
-			
-			System.out.println(output);
-			
-			input = cleanConsoleInput();
-		}
-		System.out.println("Goodbye!");
-	}
+        // PART 1: Startup message
+        System.out.println("λ Calculator Ready.\nType 'exit' to quit.");
+
+        // PART 2: Initialize Lexer and Parser
+        Lexer lexer = new Lexer();
+        Parser parser = new Parser();
+
+        // PART 3: Input-processing loop
+        while (true) {
+            String input = cleanConsoleInput();
+
+            if (input.equalsIgnoreCase("exit")) {
+                break;
+            }
+
+            try {
+                // PART 4: Tokenize input
+                ArrayList<String> tokens = lexer.tokenize(input);
+
+                // PART 5: Parse expression from tokens
+                Expression expression = parser.parse(tokens);
+
+                // PART 6: Evaluate or display result
+                System.out.println(expression.toString());
+
+            } catch (Exception e) {
+                System.out.println("Error: Could not parse input: \"" + input + "\"");
+                System.out.println("Details: " + e.getMessage());
+            }
+        }
+
+        // PART 7: Exit message
+        System.out.println("Goodbye!");
+    }
 
 	
 	
