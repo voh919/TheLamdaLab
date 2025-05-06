@@ -1,4 +1,3 @@
-
 public class Application implements Expression {
     private Expression function;
     private Expression argument;

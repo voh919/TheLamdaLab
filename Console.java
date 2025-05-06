@@ -7,19 +7,16 @@ import java.util.regex.Pattern;
 
 public class Console {
 
-    // Scanner for user input
+    // Scanner
     private static Scanner in = new Scanner(System.in);
 
     public static void main(String[] args) {
 
-        // PART 1: Startup message
-        System.out.println("λ Calculator Ready.\nType 'exit' to quit.");
-
-        // PART 2: Initialize Lexer and Parser
+        // Initialize Lexer and Parser
         Lexer lexer = new Lexer();
         Parser parser = new Parser();
 
-        // PART 3: Input-processing loop
+        // Input-processing loop
         while (true) {
             String input = cleanConsoleInput();
 
@@ -28,13 +25,13 @@ public class Console {
             }
 
             try {
-                // PART 4: Tokenize input
+                // Tokenize input
                 ArrayList<String> tokens = lexer.tokenize(input);
 
-                //PART 5: Parse expression from tokens
+                // Parse expression from tokens
                 Expression expression = parser.parse(tokens);
 
-                //PART 6: Evaluate or display result
+                // Evaluate or display result
                 System.out.println(expression.toString());
 
             } catch (Exception e) {
@@ -43,7 +40,7 @@ public class Console {
             }
         }
 
-        // PART 7: Exit message
+        // Exit message
         System.out.println("Goodbye!");
     }
 
