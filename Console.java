@@ -1,5 +1,7 @@
 // λ
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -7,16 +9,16 @@ import java.util.regex.Pattern;
 
 public class Console {
 
-    // Scanner
+    // Scanner for user input
     private static Scanner in = new Scanner(System.in);
 
     public static void main(String[] args) {
+		Map<String, Expression> dictionary = new HashMap<>();
 
-        // Initialize Lexer and Parser
         Lexer lexer = new Lexer();
         Parser parser = new Parser();
 
-        // Input-processing loop
+        // input loop
         while (true) {
             String input = cleanConsoleInput();
 
@@ -25,13 +27,13 @@ public class Console {
             }
 
             try {
-                // Tokenize input
+                // tokenize
                 ArrayList<String> tokens = lexer.tokenize(input);
 
-                // Parse expression from tokens
+                // parse
                 Expression expression = parser.parse(tokens);
 
-                // Evaluate or display result
+                // show result
                 System.out.println(expression.toString());
 
             } catch (Exception e) {
@@ -40,7 +42,7 @@ public class Console {
             }
         }
 
-        // Exit message
+        // goodbye!
         System.out.println("Goodbye!");
     }
 

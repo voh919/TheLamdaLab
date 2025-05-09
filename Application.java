@@ -1,6 +1,6 @@
 public class Application implements Expression {
-    private Expression function;
-    private Expression argument;
+    private final Expression function;
+    private final Expression argument;
 
     public Application(Expression function, Expression argument) {
         this.function = function;

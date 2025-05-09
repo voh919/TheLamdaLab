@@ -48,4 +48,11 @@ public class Parser {
         Expression variable = new Variable(first);       // new variable
         return parseTree(exp == null ? variable : new Application(exp, variable)); 
     }
+
+    // public Expression store (Expression exp) {
+       
+    // }
+    
 }
+
+
