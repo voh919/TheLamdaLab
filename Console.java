@@ -21,7 +21,7 @@ public class Console {
         // input loop
         while (true) {
             String input = cleanConsoleInput();
-
+			
             if (input.equalsIgnoreCase("exit")) {
                 break;
             }
@@ -34,7 +34,7 @@ public class Console {
                 Expression expression = parser.parse(tokens);
 
                 // show result
-                System.out.println(expression.toString());
+                //System.out.println(expression.toString());
 
             } catch (Exception e) {
                 System.out.println("Error: Could not parse input: \"" + input + "\"");
