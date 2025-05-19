@@ -26,7 +26,7 @@ public class Parser {
         }
         else {
             stored.put(name, parsed);
-            System.out.println("Added " + parsed + " as " + name);
+            System.out.println("Added " + parsed.inline(stored) + " as " + name);
         }
         return parsed;
     }

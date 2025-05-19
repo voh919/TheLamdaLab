@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 public class Function implements Expression {
     private final Variable parameter;
     private final Expression body;
@@ -10,5 +12,9 @@ public class Function implements Expression {
     @Override
     public String toString() {
         return "(λ" + parameter.toString() + "." + body.toString() + ")";
+    }
+
+    public Expression inline(HashMap<String, Expression> stored) {
+        return new Function(parameter, body.inline(stored));
     }
 }
