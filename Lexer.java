@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class Lexer {
-    public ArrayList<String> tokenize(String input) {
+    public static ArrayList<String> tokenize(String input) {
         Set<Character> symbols = Set.of('(', ')', '\\', 'λ', '.', '=', ';');
         ArrayList<String> tokens = new ArrayList<>();
         String token = "";

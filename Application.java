@@ -3,11 +3,23 @@ import java.util.HashMap;
 public class Application implements Expression {
     private final Expression function;
     private final Expression argument;
+  
 
     public Application(Expression function, Expression argument) {
         this.function = function;
         this.argument = argument;
     }
+
+    public Expression getFunction() {
+        return function;
+    }
+
+    public Expression getArgument() {
+        return argument;
+    }
+
+
+
 
     @Override
     public String toString() {

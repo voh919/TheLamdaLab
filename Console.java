@@ -13,38 +13,79 @@ public class Console {
     private static Scanner in = new Scanner(System.in);
 
     public static void main(String[] args) {
-		Map<String, Expression> dictionary = new HashMap<>();
+    Map<String, Expression> dictionary = new HashMap<>();
+    Lexer lexer = new Lexer();
+    Parser parser = new Parser();
 
-        Lexer lexer = new Lexer();
-        Parser parser = new Parser();
+    while (true) {
+        String input = cleanConsoleInput();
 
-        // input loop
-        while (true) {
-            String input = cleanConsoleInput();
-			
-            if (input.equalsIgnoreCase("exit")) {
-                break;
-            }
-
-            try {
-                // tokenize
-                ArrayList<String> tokens = lexer.tokenize(input);
-
-                // parse
-                Expression expression = parser.parse(tokens);
-
-                // show result
-                System.out.println(expression.toString());
-
-            } catch (Exception e) {
-                System.out.println("Error: Could not parse input: \"" + input + "\"");
-                System.out.println("Details: " + e.getMessage());
-            }
+        if (input.equalsIgnoreCase("exit")) {
+            break;
         }
 
-        // goodbye!
-        System.out.println("Goodbye!");
+        try {
+            ArrayList<String> tokens = lexer.tokenize(input);
+
+            // ✅ Handle "run" before parsing
+            if (!tokens.isEmpty() && tokens.get(0).equals("run")) {
+                tokens.remove(0);
+                ArrayList<String> resolved = new ArrayList<>();
+                for (String t : tokens) {
+                    if (dictionary.containsKey(t)) {
+                        resolved.addAll(lexer.tokenize(dictionary.get(t).toString()));
+                    } else {
+                        resolved.add(t);
+                    }
+                }
+                Expression expr = parser.parse(resolved);
+                Expression result = Runner.run(expr);
+                System.out.println(result.toString());
+                continue;
+            }
+
+            // ✅ Handle assignment like: name = \f.\x.x
+            if (tokens.contains("=")) {
+                int eqIndex = tokens.indexOf("=");
+                if (eqIndex != 1) {
+                    System.out.println("Invalid assignment syntax.");
+                    continue;
+                }
+
+                String name = tokens.get(0);
+                if (dictionary.containsKey(name)) {
+                    System.out.println(name + " is already defined.");
+                    continue;
+                }
+
+                ArrayList<String> rhsTokens = new ArrayList<>(tokens.subList(2, tokens.size()));
+                Expression rhsExp = parser.parse(rhsTokens);
+                dictionary.put(name, rhsExp);
+                System.out.println("Added " + rhsExp.toString() + " as " + name);
+                continue;
+            }
+
+            ArrayList<String> resolved = new ArrayList<>();
+            for (String t : tokens) {
+                if (dictionary.containsKey(t)) {
+                    resolved.addAll(lexer.tokenize(dictionary.get(t).toString()));
+                } else {
+                    resolved.add(t);
+                }
+            }
+
+            Expression expr = parser.parse(resolved);
+            System.out.println(expr.toString());
+
+        } catch (Exception e) {
+            System.out.println("Error: Could not parse input: \"" + input + "\"");
+            System.out.println("Details: " + e.getMessage());
+        }
     }
+
+    System.out.println("Goodbye!");
+}
+
 
 	
 	
