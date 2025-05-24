@@ -9,6 +9,14 @@ public class Function implements Expression {
         this.body = body;
     }
 
+    public Variable getParameter() {
+        return parameter;
+    }
+
+    public Expression getBody() {
+        return body;
+    }
+
     @Override
     public String toString() {
         return "(λ" + parameter.toString() + "." + body.toString() + ")";

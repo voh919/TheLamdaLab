@@ -44,12 +44,13 @@ public class Parser {
     tokens = new ArrayList<>(tokens.subList(1, tokens.size()));
 
     if (first.equals("\\")) {
-        Variable v = new Variable(tokens.get(0));
-        tokens = new ArrayList<>(tokens.subList(2, tokens.size())); // skip dot
-        Expression body = parseTree(null);
-        Function f = new Function(v, body);
-        return exp == null ? parseTree(f) : parseTree(new Application(exp, f));
+    Variable v = new Variable(tokens.get(0));
+    tokens = new ArrayList<>(tokens.subList(2, tokens.size())); // skip dot
+    Expression body = parseTree(null);
+    Function f = new Function(v, body);
+    return exp == null ? f : new Application(exp, f);
     }
+
 
     if (first.equals("(")) {
         parens.add((byte) 1);
