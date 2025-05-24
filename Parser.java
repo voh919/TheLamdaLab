@@ -62,6 +62,12 @@ public class Parser {
         parens.remove(0);
         return exp;
     }
+    // Special built-in: run (like a keyword)
+    if (first.equals("run")) {
+        Expression toRun = parseTree(null); // get the next expression
+        Expression result = Runner.run(toRun); // evaluate it
+        return parseTree(exp == null ? result : new Application(exp, result));
+    }
 
     // Check if it's a stored expression
     Expression variable;
