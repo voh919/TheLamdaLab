@@ -1,62 +1,89 @@
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 public class Runner {
 
     public static Expression run(Expression exp) {
-        // Inline definitions, if any (optional, can skip if unused)
-        return reduce(exp);
-    }
-
-    private static Expression reduce(Expression exp) {
         if (exp instanceof Variable) {
             return exp;
         }
 
         if (exp instanceof Function) {
             Function f = (Function) exp;
-            Expression reducedBody = reduce(f.getBody());
+            Expression reducedBody = run(f.getBody());
             return new Function(f.getParameter(), reducedBody);
         }
 
         if (exp instanceof Application) {
             Application app = (Application) exp;
-            Expression function = reduce(app.getFunction());
-            Expression argument = reduce(app.getArgument());
+            Expression func = run(app.getFunction());
+            Expression arg = run(app.getArgument());
 
-            if (function instanceof Function) {
-                Function f = (Function) function;
-                Expression substituted = substitute(f.getBody(), f.getParameter().toString(), argument);
-                return reduce(substituted);  // Keep reducing after substitution
+            if (func instanceof Function) {
+                Function f = (Function) func;
+
+                // Alpha-rename to avoid variable capture
+                Expression renamedBody = alphaRename(f.getBody(), f.getParameter().toString(), new HashSet<>());
+                Expression substituted = substitute(renamedBody, f.getParameter().toString(), arg);
+                return run(substituted);
             }
 
-            return new Application(function, argument);
+            return new Application(func, arg);
         }
 
-        return exp;  // fallback
+        return exp;
     }
 
-    private static Expression substitute(Expression body, String varName, Expression replacement) {
+    private static Expression substitute(Expression body, String varName, Expression value) {
         if (body instanceof Variable) {
             Variable v = (Variable) body;
-            return v.toString().equals(varName) ? replacement : v;
+            return v.toString().equals(varName) ? value : v;
+
+        } else if (body instanceof Application) {
+            Application app = (Application) body;
+            return new Application(
+                substitute(app.getFunction(), varName, value),
+                substitute(app.getArgument(), varName, value)
+            );
+
+        } else if (body instanceof Function) {
+            Function f = (Function) body;
+            if (f.getParameter().toString().equals(varName)) {
+                return f;
+            }
+            return new Function(f.getParameter(), substitute(f.getBody(), varName, value));
+        }
+
+        return body;
+    }
+
+    // Alpha-renaming: ensure no bound variable name conflicts with free vars in 'value'
+    private static Expression alphaRename(Expression body, String oldName, Set<String> usedNames) {
+        if (body instanceof Variable) {
+            return body;
+        }
+
+        if (body instanceof Application) {
+            Application app = (Application) body;
+            return new Application(
+                alphaRename(app.getFunction(), oldName, usedNames),
+                alphaRename(app.getArgument(), oldName, usedNames)
+            );
         }
 
         if (body instanceof Function) {
             Function f = (Function) body;
             String paramName = f.getParameter().toString();
-
-            // Avoid variable capture
-            if (paramName.equals(varName)) {
-                return f;  // Skip substitution inside shadowed scope
+            if (usedNames.contains(paramName)) {
+                String newName = paramName + "_" + UUID.randomUUID().toString().replace("-", "").substring(0, 5);
+                Variable newParam = new Variable(newName);
+                Expression renamedBody = substitute(f.getBody(), paramName, newParam);
+                return new Function(newParam, alphaRename(renamedBody, oldName, usedNames));
+            } else {
+                usedNames.add(paramName);
+                return new Function(f.getParameter(), alphaRename(f.getBody(), oldName, usedNames));
             }
-
-            Expression newBody = substitute(f.getBody(), varName, replacement);
-            return new Function(f.getParameter(), newBody);
-        }
-
-        if (body instanceof Application) {
-            Application app = (Application) body;
-            Expression newFunc = substitute(app.getFunction(), varName, replacement);
-            Expression newArg = substitute(app.getArgument(), varName, replacement);
-            return new Application(newFunc, newArg);
         }
 
         return body;

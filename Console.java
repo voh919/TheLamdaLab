@@ -39,8 +39,16 @@ public class Console {
                     }
                 }
                 Expression expr = parser.parse(resolved);
-                Expression result = Runner.run(expr);
-                System.out.println(result.toString());
+                Expression reduced = Runner.run(expr);
+
+                String resultStr = reduced.toString();
+                if (resultStr.equals("(λx.(λy.x))")) {
+                    System.out.println("true");
+                } else if (resultStr.equals("(λx.(λy.y))")) {
+                    System.out.println("false");
+                } else {
+                    System.out.println(resultStr);
+                }
                 continue;
             }
 
