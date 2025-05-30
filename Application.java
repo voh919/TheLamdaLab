@@ -18,9 +18,6 @@ public class Application implements Expression {
         return argument;
     }
 
-
-
-
     @Override
     public String toString() {
         return "(" + function.toString() + " " + argument.toString() + ")";
