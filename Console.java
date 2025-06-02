@@ -13,7 +13,8 @@ public class Console {
     private static Scanner in = new Scanner(System.in);
 
     public static void main(String[] args) {
-    Map<String, Expression> dictionary = new HashMap<>();
+   
+     Map<String, Expression> dictionary = new HashMap<>();
     Lexer lexer = new Lexer();
     Parser parser = new Parser();
 
@@ -27,7 +28,7 @@ public class Console {
         try {
             ArrayList<String> tokens = lexer.tokenize(input);
 
-            // ✅ Handle "run" before parsing
+            // Handle "run" before parsing
             if (!tokens.isEmpty() && tokens.get(0).equals("run")) {
                 tokens.remove(0);
                 ArrayList<String> resolved = new ArrayList<>();
@@ -52,7 +53,7 @@ public class Console {
                 continue;
             }
 
-            // ✅ Handle assignment like: name = \f.\x.x
+            // Handle assignment like: name = \f.\x.x
             if (tokens.contains("=")) {
                 int eqIndex = tokens.indexOf("=");
                 if (eqIndex != 1) {

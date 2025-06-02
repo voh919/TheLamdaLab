@@ -1,9 +1,11 @@
+// Updated Application.java with improved toString formatting
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Application implements Expression {
     private final Expression function;
     private final Expression argument;
-  
 
     public Application(Expression function, Expression argument) {
         this.function = function;
@@ -20,9 +22,18 @@ public class Application implements Expression {
 
     @Override
     public String toString() {
-        return "(" + function.toString() + " " + argument.toString() + ")";
+        String funcStr = function instanceof Variable ? function.toString() : "(" + function.toString() + ")";
+        String argStr = argument instanceof Variable ? argument.toString() : "(" + argument.toString() + ")";
+        return funcStr + " " + argStr;
     }
+
     public Expression inline(HashMap<String, Expression> stored) {
         return new Application(function.inline(stored), argument.inline(stored));
+    }
+
+    public Set<String> freeVars() {
+        Set<String> vars = new HashSet<>(function.freeVars());
+        vars.addAll(argument.freeVars());
+        return vars;
     }
 }

@@ -1,4 +1,6 @@
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Function implements Expression {
     private final Variable parameter;
@@ -17,12 +19,17 @@ public class Function implements Expression {
         return body;
     }
 
-    @Override
     public String toString() {
-        return "(λ" + parameter.toString() + "." + body.toString() + ")";
+        return "(\u03bb" + parameter.toString() + "." + body.toString() + ")";
     }
 
     public Expression inline(HashMap<String, Expression> stored) {
         return new Function(parameter, body.inline(stored));
+    }
+
+    public Set<String> freeVars() {
+        Set<String> vars = new HashSet<>(body.freeVars());
+        vars.remove(parameter.toString());
+        return vars;
     }
 }
