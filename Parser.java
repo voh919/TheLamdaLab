@@ -6,7 +6,7 @@ public class Parser {
     private ArrayList<String> tokens;          
     private ArrayList<Byte> parens = new ArrayList<>(); 
     private String firstToken = "";
-    private HashMap<String, Expression> stored = new HashMap<>();
+    private static HashMap<String, Expression> stored = new HashMap<>();  // Made static
 
 
     // take in the array list
@@ -20,7 +20,7 @@ public class Parser {
     if (tokens.size() > 2 && tokens.get(1).equals("=")) {
         String name = tokens.get(0);
         ArrayList<String> rest = new ArrayList<>(tokens.subList(2, tokens.size()));
-        Expression parsed = new Parser().parse(rest);  // parse new expression
+        Expression parsed = parse(rest);  // Use same instance, not new Parser()
         if (stored.containsKey(name)){
             System.out.println(name + " is already defined.");
         }
@@ -65,7 +65,9 @@ public class Parser {
     // Special built-in: run (like a keyword)
     if (first.equals("run")) {
         Expression toRun = parseTree(null); // get the next expression
-        Expression result = Runner.run(toRun); // evaluate it
+        // Inline any stored variables before running
+        Expression inlined = toRun.inline(stored);
+        Expression result = Runner.run(inlined); // evaluate it
         return parseTree(exp == null ? result : new Application(exp, result));
     }
 

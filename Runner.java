@@ -1,107 +1,110 @@
-// Updated Runner.java with corrected generateFreshName and safe guard for already-renamed variables
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Runner {
+    private static HashMap<String, Expression> stored = new HashMap<>();
+
+    // Method to set stored definitions (called from Parser)
+    public static void setStored(HashMap<String, Expression> storedMap) {
+        stored = storedMap;
+    }
 
     public static Expression run(Expression exp) {
         if (exp instanceof Variable) {
-            return exp;
+            Variable var = (Variable) exp;
+            // Use the inline method to resolve stored variables
+            Expression resolved = var.inline(stored);
+            if (resolved != var) {
+                // If the variable was resolved to something else, run that
+                return run(resolved);
+            }
+            return var; // Return the variable if it's not stored
         }
 
         if (exp instanceof Function) {
             Function f = (Function) exp;
-            return new Function(f.getParameter(), run(f.getBody()));
+            return new Function(f.getParameter(), fullyReduce(f.getBody()));
         }
 
         if (exp instanceof Application) {
             Application app = (Application) exp;
             Expression func = run(app.getFunction());
-            Expression arg = run(app.getArgument());
+            Expression arg = app.getArgument();
 
             if (func instanceof Function) {
                 Function f = (Function) func;
-                String paramName = f.getParameter().toString();
-                Set<String> argFreeVars = arg.freeVars();
-
-                Expression bodyToUse = f.getBody();
-
-                // Rename if the paramName is in the argument's free vars
-                if (argFreeVars.contains(paramName)) {
-                    // Avoid renaming already-renamed variables like r1 → r11
-                    if (!paramName.matches(".*\\d+$")) {
-                        String newName = generateFreshName(paramName, argFreeVars, bodyToUse.freeVars());
-                        Variable newParam = new Variable(newName);
-                        bodyToUse = substitute(bodyToUse, paramName, newParam);
-                        f = new Function(newParam, bodyToUse); // replace function with renamed one
-                        paramName = newName;
-                    }
-                }
-
-                Expression substituted = substitute(f.getBody(), paramName, arg);
-                return run(substituted);
+                return fullyReduce(substitute(f.getBody(), f.getParameter().getName(), arg));
+            } else {
+                return new Application(func, arg);
             }
-
-            return new Application(func, arg);
         }
 
         return exp;
     }
+    
+    public static Expression fullyReduce(Expression exp) {
+        Expression previous;
+        Expression current = exp;
 
-    private static Expression substitute(Expression body, String varName, Expression value) {
+        do {
+            previous = current;
+            current = run(previous);
+        } while (!current.toString().equals(previous.toString()));
+
+        return current;
+    }
+
+    private static Expression substitute(Expression body, String paramName, Expression arg) {
+        // Perform capture-avoiding substitution
         if (body instanceof Variable) {
-            Variable v = (Variable) body;
-            return v.toString().equals(varName) ? value : v;
+            Variable var = (Variable) body;
+            return var.getName().equals(paramName) ? arg : var;
+        }
 
-        } else if (body instanceof Application) {
+        if (body instanceof Function) {
+            Function f = (Function) body;
+            String param = f.getParameter().getName();
+
+            if (param.equals(paramName)) {
+                return f; // No substitution, shadowed
+            }
+
+            Set<String> freeVars = arg.freeVars();
+            if (freeVars.contains(param)) {
+                // Perform alpha conversion to avoid variable capture
+                String newParam = generateFreshVariable(param, body, arg);
+                Expression renamedBody = substitute(f.getBody(), param, new Variable(newParam));
+                return new Function(new Variable(newParam), substitute(renamedBody, paramName, arg));
+            }
+
+            return new Function(f.getParameter(), substitute(f.getBody(), paramName, arg));
+        }
+
+        if (body instanceof Application) {
             Application app = (Application) body;
             return new Application(
-                substitute(app.getFunction(), varName, value),
-                substitute(app.getArgument(), varName, value)
+                substitute(app.getFunction(), paramName, arg),
+                substitute(app.getArgument(), paramName, arg)
             );
-
-        } else if (body instanceof Function) {
-            Function f = (Function) body;
-            String param = f.getParameter().toString();
-
-            if (param.equals(varName)) {
-                return f; // Skip substitution due to shadowing
-            }
-
-            Set<String> valueFree = value.freeVars();
-            Set<String> bodyFree = f.getBody().freeVars();
-
-            if (valueFree.contains(param)) {
-                // Avoid renaming already-renamed variables like r1 → r11
-                if (!param.matches(".*\\d+$")) {
-                    String newName = generateFreshName(param, valueFree, bodyFree);
-                    Variable newParam = new Variable(newName);
-                    Expression renamedBody = substitute(f.getBody(), param, newParam);
-                    Expression newBody = substitute(renamedBody, varName, value);
-                    return new Function(newParam, newBody);
-                }
-            }
-
-            return new Function(f.getParameter(), substitute(f.getBody(), varName, value));
         }
 
         return body;
     }
 
-    // Simplified generateFreshName to ensure only one safe name is chosen
-    private static String generateFreshName(String base, Set<String>... avoidSets) {
-        int i = 1;
-        String candidate = base + i;
-
-        Set<String> allUsed = new HashSet<>();
-        for (Set<String> set : avoidSets) {
-            allUsed.addAll(set);
+    private static String generateFreshVariable(String base, Expression... exprs) {
+        Set<String> allVars = new HashSet<>();
+        for (Expression e : exprs) {
+            allVars.addAll(e.freeVars());
         }
 
-        // Skip any already-generated renames (r1, r2, r3, etc.)
-        while (allUsed.contains(candidate)) {
-            i++;
-            candidate = base + i;
+        int counter = 1;
+        String candidate = base + counter;
+        while (allVars.contains(candidate)) {
+            counter++;
+            candidate = base + counter;
         }
+
         return candidate;
     }
-} 
+}
