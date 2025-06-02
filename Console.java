@@ -77,8 +77,8 @@ public class Console {
             }
         }
 
-        System.out.println("Goodbye!");
-    }
+    System.out.println("Goodbye!");
+}
 
     private static Expression parseWithSubstitutions(ArrayList<String> tokens, Map<String, Expression> dict, Lexer lexer, Parser parser) throws Exception {
         ArrayList<String> resolved = new ArrayList<>();
