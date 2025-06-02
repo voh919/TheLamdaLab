@@ -1,6 +1,8 @@
 import java.util.HashMap;
+import java.util.Set;
 
 public interface Expression {
-    public abstract String toString();  // Pretty printed
-    public abstract Expression inline(HashMap<String, Expression> stored);  // Inlines stored variables
+    String toString();
+    Expression inline(HashMap<String, Expression> stored);
+    Set<String> freeVars();
 }

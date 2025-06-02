@@ -1,9 +1,10 @@
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Application implements Expression {
     private final Expression function;
     private final Expression argument;
-  
 
     public Application(Expression function, Expression argument) {
         this.function = function;
@@ -18,11 +19,17 @@ public class Application implements Expression {
         return argument;
     }
 
-    @Override
     public String toString() {
         return "(" + function.toString() + " " + argument.toString() + ")";
     }
+
     public Expression inline(HashMap<String, Expression> stored) {
         return new Application(function.inline(stored), argument.inline(stored));
+    }
+
+    public Set<String> freeVars() {
+        Set<String> vars = new HashSet<>(function.freeVars());
+        vars.addAll(argument.freeVars());
+        return vars;
     }
 }

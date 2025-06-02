@@ -13,7 +13,8 @@ public class Console {
     private static Scanner in = new Scanner(System.in);
 
     public static void main(String[] args) {
-    Map<String, Expression> dictionary = new HashMap<>();
+   
+     Map<String, Expression> dictionary = new HashMap<>();
     Lexer lexer = new Lexer();
     Parser parser = new Parser();
 

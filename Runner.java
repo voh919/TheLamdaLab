@@ -1,6 +1,5 @@
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+// Updated Runner.java with precise alpha-conversion and minimal renaming
+import java.util.*;
 
 public class Runner {
 
@@ -11,8 +10,7 @@ public class Runner {
 
         if (exp instanceof Function) {
             Function f = (Function) exp;
-            Expression reducedBody = run(f.getBody());
-            return new Function(f.getParameter(), reducedBody);
+            return new Function(f.getParameter(), run(f.getBody()));
         }
 
         if (exp instanceof Application) {
@@ -22,10 +20,21 @@ public class Runner {
 
             if (func instanceof Function) {
                 Function f = (Function) func;
+                String paramName = f.getParameter().toString();
+                Set<String> argFreeVars = arg.freeVars();
 
-                // Alpha-rename to avoid variable capture
-                Expression renamedBody = alphaRename(f.getBody(), f.getParameter().toString(), new HashSet<>());
-                Expression substituted = substitute(renamedBody, f.getParameter().toString(), arg);
+                Expression bodyToUse = f.getBody();
+
+                // Rename if the paramName is in the argument's free vars
+                if (argFreeVars.contains(paramName)) {
+                    String newName = generateFreshName(paramName, argFreeVars, bodyToUse.freeVars());
+                    Variable newParam = new Variable(newName);
+                    bodyToUse = substitute(bodyToUse, paramName, newParam);
+                    f = new Function(newParam, bodyToUse); // replace function with renamed one
+                    paramName = newName;
+                }
+
+                Expression substituted = substitute(f.getBody(), paramName, arg);
                 return run(substituted);
             }
 
@@ -49,43 +58,42 @@ public class Runner {
 
         } else if (body instanceof Function) {
             Function f = (Function) body;
-            if (f.getParameter().toString().equals(varName)) {
-                return f;
+            String param = f.getParameter().toString();
+
+            if (param.equals(varName)) {
+                return f; // Skip substitution due to shadowing
             }
-            return new Function(f.getParameter(), substitute(f.getBody(), varName, value));
+
+            Set<String> valueFree = value.freeVars();
+            Set<String> bodyFree = f.getBody().freeVars();
+
+            if (valueFree.contains(param)) {
+                String newName = generateFreshName(param, valueFree, bodyFree);
+                Variable newParam = new Variable(newName);
+                Expression renamedBody = substitute(f.getBody(), param, newParam);
+                Expression newBody = substitute(renamedBody, varName, value);
+                return new Function(newParam, newBody);
+            } else {
+                return new Function(f.getParameter(), substitute(f.getBody(), varName, value));
+            }
         }
 
         return body;
     }
 
-    // Alpha-renaming: ensure no bound variable name conflicts with free vars in 'value'
-    private static Expression alphaRename(Expression body, String oldName, Set<String> usedNames) {
-        if (body instanceof Variable) {
-            return body;
-        }
-
-        if (body instanceof Application) {
-            Application app = (Application) body;
-            return new Application(
-                alphaRename(app.getFunction(), oldName, usedNames),
-                alphaRename(app.getArgument(), oldName, usedNames)
-            );
-        }
-
-        if (body instanceof Function) {
-            Function f = (Function) body;
-            String paramName = f.getParameter().toString();
-            if (usedNames.contains(paramName)) {
-                String newName = paramName + "_" + UUID.randomUUID().toString().replace("-", "").substring(0, 5);
-                Variable newParam = new Variable(newName);
-                Expression renamedBody = substitute(f.getBody(), paramName, newParam);
-                return new Function(newParam, alphaRename(renamedBody, oldName, usedNames));
-            } else {
-                usedNames.add(paramName);
-                return new Function(f.getParameter(), alphaRename(f.getBody(), oldName, usedNames));
+    private static String generateFreshName(String base, Set<String>... avoidSets) {
+        int i = 1;
+        while (true) {
+            final String candidate = base + i;
+            boolean conflict = false;
+            for (Set<String> set : avoidSets) {
+                if (set.contains(candidate)) {
+                    conflict = true;
+                    break;
+                }
             }
+            if (!conflict) return candidate;
+            i++;
         }
-
-        return body;
     }
 }
