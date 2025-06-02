@@ -1,6 +1,5 @@
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class Runner {
 
@@ -33,7 +32,9 @@ public class Runner {
         }
 
         return exp;
+        
     }
+    
 
     private static Expression substitute(Expression body, String varName, Expression value) {
         if (body instanceof Variable) {
@@ -56,9 +57,10 @@ public class Runner {
         }
 
         return body;
+        
     }
 
-    // Alpha-renaming: ensure no bound variable name conflicts with free vars in 'value'
+        // Alpha-renaming: ensure no bound variable name conflicts with free vars in 'value'
     private static Expression alphaRename(Expression body, String oldName, Set<String> usedNames) {
         if (body instanceof Variable) {
             return body;
@@ -75,17 +77,37 @@ public class Runner {
         if (body instanceof Function) {
             Function f = (Function) body;
             String paramName = f.getParameter().toString();
-            if (usedNames.contains(paramName)) {
-                String newName = paramName + "_" + UUID.randomUUID().toString().replace("-", "").substring(0, 5);
-                Variable newParam = new Variable(newName);
-                Expression renamedBody = substitute(f.getBody(), paramName, newParam);
-                return new Function(newParam, alphaRename(renamedBody, oldName, usedNames));
-            } else {
-                usedNames.add(paramName);
+
+            if (paramName.equals(oldName)) {
+                // Already using the desired parameter name, no change needed
                 return new Function(f.getParameter(), alphaRename(f.getBody(), oldName, usedNames));
             }
+
+            // If the parameter name conflicts with used names, rename it
+            if (usedNames.contains(paramName)) {
+                String newName = generateUniqueName(usedNames);
+                Variable newParam = new Variable(newName);
+                Expression renamedBody = substitute(f.getBody(), paramName, newParam);
+                usedNames.add(newName);
+                return new Function(newParam, alphaRename(renamedBody, oldName, usedNames));
+            }
+
+            usedNames.add(paramName);
+            return new Function(f.getParameter(), alphaRename(f.getBody(), oldName, usedNames));
         }
 
         return body;
     }
+
+    // Utility to generate a unique variable name
+    private static String generateUniqueName(Set<String> used) {
+        String base = "v";
+        int counter = 0;
+        while (used.contains(base + counter)) {
+            counter++;
+        }
+        return base + counter;
+    }
+    
+
 }
