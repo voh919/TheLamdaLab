@@ -9,10 +9,16 @@ public class Variable implements Expression {
         this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public String toString() {
         return name;
     }
 
+    @Override
     public Expression inline(HashMap<String, Expression> stored) {
         if (stored.containsKey(name)) {
             return stored.get(name).inline(stored);
@@ -20,9 +26,24 @@ public class Variable implements Expression {
         return this;
     }
 
+    @Override
     public Set<String> freeVars() {
-        Set<String> vars = new HashSet<>();
+        HashSet<String> vars = new HashSet<>();
         vars.add(name);
         return vars;
+    }
+
+    // Equals and hashCode help avoid issues in Sets and Maps
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Variable)) return false;
+        Variable other = (Variable) o;
+        return this.name.equals(other.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 }

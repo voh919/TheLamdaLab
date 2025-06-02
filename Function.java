@@ -19,17 +19,20 @@ public class Function implements Expression {
         return body;
     }
 
+    @Override
     public String toString() {
-        return "(\u03bb" + parameter.toString() + "." + body.toString() + ")";
+        return "(λ" + parameter + "." + body + ")";
     }
 
+    @Override
     public Expression inline(HashMap<String, Expression> stored) {
         return new Function(parameter, body.inline(stored));
     }
 
+    @Override
     public Set<String> freeVars() {
-        Set<String> vars = new HashSet<>(body.freeVars());
-        vars.remove(parameter.toString());
-        return vars;
+        HashSet<String> free = new HashSet<>(body.freeVars());
+        free.remove(parameter.getName());
+        return free;
     }
 }
