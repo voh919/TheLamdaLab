@@ -31,7 +31,7 @@ public class Console {
                     String resultStr = expr.toString();
                     if (resultStr.equals("(λx.(λy.x))")) {
                         System.out.println("true");
-                    } else if (resultStr.equals("(λx.(λy.y))")) {
+                    } else if (resultStr.equals("(λx.(λy.y))") || resultStr.equals("(λf.(λx.x))")) {
                         System.out.println("false");
                     } else if (!resultStr.isEmpty() && !resultStr.equals("")) {
                         System.out.println(resultStr);
