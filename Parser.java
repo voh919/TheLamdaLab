@@ -28,7 +28,7 @@ public class Parser {
             stored.put(name, parsed);
             System.out.println("Added " + parsed.inline(stored) + " as " + name);
         }
-        return parsed;
+        return new Variable("");  // Return empty variable for definitions
     }
 
     firstToken = tokens.get(0);

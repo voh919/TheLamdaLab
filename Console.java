@@ -26,14 +26,14 @@ public class Console {
                 Expression expr = parser.parse(tokens);
                 
                 // The parser handles both definitions and run commands
-                // Just print the result if it's not null
+                // Just print the result if it's not null and not empty
                 if (expr != null) {
                     String resultStr = expr.toString();
                     if (resultStr.equals("(λx.(λy.x))")) {
                         System.out.println("true");
                     } else if (resultStr.equals("(λx.(λy.y))")) {
                         System.out.println("false");
-                    } else if (!resultStr.isEmpty()) {
+                    } else if (!resultStr.isEmpty() && !resultStr.equals("")) {
                         System.out.println(resultStr);
                     }
                 }
