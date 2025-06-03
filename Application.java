@@ -21,8 +21,14 @@ public class Application implements Expression {
 
     @Override
     public String toString() {
-        String funcStr = function instanceof Variable ? function.toString() : "(" + function.toString() + ")";
-        String argStr = argument instanceof Variable ? argument.toString() : "(" + argument.toString() + ")";
+        String funcStr = function.toString();
+        String argStr = argument.toString();
+        
+        // Only add parentheses around the argument if it's an application
+        if (argument instanceof Application) {
+            argStr = "(" + argStr + ")";
+        }
+        
         return funcStr + " " + argStr;
     }
 
@@ -38,4 +44,3 @@ public class Application implements Expression {
         return vars;
     }
 }
-
