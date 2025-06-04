@@ -11,36 +11,7 @@ public class Runner {
     }
 
     public static Expression run(Expression exp) {
-        if (exp instanceof Variable) {
-            Variable var = (Variable) exp;
-            // Use the inline method to resolve stored variables
-            Expression resolved = var.inline(stored);
-            if (resolved != var) {
-                // If the variable was resolved to something else, run that
-                return run(resolved);
-            }
-            return var; // Return the variable if it's not stored
-        }
-
-        if (exp instanceof Function) {
-            Function f = (Function) exp;
-            return new Function(f.getParameter(), fullyReduce(f.getBody()));
-        }
-
-        if (exp instanceof Application) {
-            Application app = (Application) exp;
-            Expression func = run(app.getFunction());
-            Expression arg = app.getArgument();
-
-            if (func instanceof Function) {
-                Function f = (Function) func;
-                return fullyReduce(substitute(f.getBody(), f.getParameter().getName(), arg));
-            } else {
-                return new Application(func, arg);
-            }
-        }
-
-        return exp;
+        return fullyReduce(exp);
     }
     
     public static Expression fullyReduce(Expression exp) {
@@ -49,10 +20,55 @@ public class Runner {
 
         do {
             previous = current;
-            current = run(previous);
+            current = reduceOneStep(previous);
         } while (!current.toString().equals(previous.toString()));
 
         return current;
+    }
+
+    private static Expression reduceOneStep(Expression exp) {
+        if (exp instanceof Variable) {
+            Variable var = (Variable) exp;
+            // Use the inline method to resolve stored variables
+            Expression resolved = var.inline(stored);
+            if (resolved != var) {
+                // If the variable was resolved to something else, continue reducing
+                return resolved;
+            }
+            return var; // Return the variable if it's not stored
+        }
+
+        if (exp instanceof Function) {
+            Function f = (Function) exp;
+            Expression reducedBody = reduceOneStep(f.getBody());
+            if (!reducedBody.toString().equals(f.getBody().toString())) {
+                return new Function(f.getParameter(), reducedBody);
+            }
+            return f;
+        }
+
+        if (exp instanceof Application) {
+            Application app = (Application) exp;
+            Expression func = reduceOneStep(app.getFunction());
+            Expression arg = app.getArgument();
+
+            if (func instanceof Function) {
+                Function f = (Function) func;
+                return substitute(f.getBody(), f.getParameter().getName(), arg);
+            } else {
+                // If function didn't reduce, try reducing the argument
+                Expression reducedArg = reduceOneStep(arg);
+                if (!func.toString().equals(app.getFunction().toString())) {
+                    return new Application(func, arg);
+                } else if (!reducedArg.toString().equals(arg.toString())) {
+                    return new Application(func, reducedArg);
+                } else {
+                    return app;
+                }
+            }
+        }
+
+        return exp;
     }
 
     private static Expression substitute(Expression body, String paramName, Expression arg) {
