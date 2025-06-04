@@ -21,15 +21,7 @@ public class Application implements Expression {
 
     @Override
     public String toString() {
-        String funcStr = function.toString();
-        String argStr = argument.toString();
-        
-        // Only add parentheses around the argument if it's an application
-        if (argument instanceof Application) {
-            argStr = "(" + argStr + ")";
-        }
-        
-        return funcStr + " " + argStr;
+        return "(" + function.toString() + " " + argument.toString() + ")";
     }
 
     @Override
