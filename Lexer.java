@@ -1,3 +1,5 @@
+// Vivian Oh and Mia Subrahmanyam
+
 import java.util.*;
 
 public class Lexer {
@@ -16,13 +18,15 @@ public class Lexer {
                     tokens.add(token);
                     token = "";
                 }
-            } else if (symbols.contains(c)) {
+            } 
+            else if (symbols.contains(c)) {
                 if (!token.isEmpty()) {
                     tokens.add(token);
                     token = "";
                 }
                 tokens.add(String.valueOf(c));
-            } else {
+            } 
+            else {
                 token += c;
             }
         }

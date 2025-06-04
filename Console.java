@@ -1,4 +1,5 @@
-// λ
+// Vivian Oh and Mia Subrahmanyam
+
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -6,7 +7,6 @@ import java.util.regex.Pattern;
 
 public class Console {
 
-    // Scanner for user input
     private static Scanner in = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -25,17 +25,19 @@ public class Console {
                 ArrayList<String> tokens = lexer.tokenize(input);
                 Expression expr = parser.parse(tokens);
                 
-                // The parser handles both definitions and run commands
-                // Just print the result if it's not null and not empty
                 if (expr != null) {
                     String resultStr = expr.toString();
+
                     if (resultStr.equals("(λx.(λy.x))")) {
                         System.out.println("true");
-                    } else if (resultStr.equals("(λx.(λy.y))") || resultStr.equals("(λf.(λx.x))")) {
+                    } 
+                    else if (resultStr.equals("(λx.(λy.y))") || resultStr.equals("(λf.(λx.x))")) {
                         System.out.println("false");
-                    } else if (!resultStr.isEmpty() && !resultStr.equals("")) {
+                    } 
+                    else if (!resultStr.isEmpty() && !resultStr.equals("")) {
                         System.out.println(resultStr);
                     }
+
                 }
 
             } catch (Exception e) {
@@ -58,7 +60,7 @@ public class Console {
     private static String cleanConsoleInput() {
         System.out.print("> ");
         String raw = in.nextLine();
-        String deBOMified = raw.replaceAll("\uFEFF", ""); // remove Byte Order Marker from UTF
+        String deBOMified = raw.replaceAll("\uFEFF", "");
 
         String clean = removeWeirdWhitespace(deBOMified);
         

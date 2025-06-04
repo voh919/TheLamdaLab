@@ -1,3 +1,5 @@
+// Vivian Oh and Mia Subrahmanyam
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -5,7 +7,6 @@ import java.util.Set;
 public class Runner {
     private static HashMap<String, Expression> stored = new HashMap<>();
 
-    // Method to set stored definitions (called from Parser)
     public static void setStored(HashMap<String, Expression> storedMap) {
         stored = storedMap;
     }
@@ -29,18 +30,18 @@ public class Runner {
     private static Expression reduceOneStep(Expression exp) {
         if (exp instanceof Variable) {
             Variable var = (Variable) exp;
-            // Use the inline method to resolve stored variables
             Expression resolved = var.inline(stored);
+
             if (resolved != var) {
-                // If the variable was resolved to something else, continue reducing
                 return resolved;
             }
-            return var; // Return the variable if it's not stored
+            return var;
         }
 
         if (exp instanceof Function) {
             Function f = (Function) exp;
             Expression reducedBody = reduceOneStep(f.getBody());
+
             if (!reducedBody.toString().equals(f.getBody().toString())) {
                 return new Function(f.getParameter(), reducedBody);
             }
@@ -55,16 +56,20 @@ public class Runner {
             if (func instanceof Function) {
                 Function f = (Function) func;
                 return substitute(f.getBody(), f.getParameter().getName(), arg);
-            } else {
-                // If function didn't reduce, try reducing the argument
+            } 
+            else {
                 Expression reducedArg = reduceOneStep(arg);
+
                 if (!func.toString().equals(app.getFunction().toString())) {
                     return new Application(func, arg);
-                } else if (!reducedArg.toString().equals(arg.toString())) {
+                } 
+                else if (!reducedArg.toString().equals(arg.toString())) {
                     return new Application(func, reducedArg);
-                } else {
+                } 
+                else {
                     return app;
                 }
+                
             }
         }
 
@@ -72,7 +77,6 @@ public class Runner {
     }
 
     private static Expression substitute(Expression body, String paramName, Expression arg) {
-        // Perform capture-avoiding substitution
         if (body instanceof Variable) {
             Variable var = (Variable) body;
             return var.getName().equals(paramName) ? arg : var;
@@ -83,12 +87,11 @@ public class Runner {
             String param = f.getParameter().getName();
 
             if (param.equals(paramName)) {
-                return f; // No substitution, shadowed
+                return f;
             }
 
             Set<String> freeVars = arg.freeVars();
             if (freeVars.contains(param)) {
-                // Perform alpha conversion to avoid variable capture
                 String newParam = generateFreshVariable(param, body, arg);
                 Expression renamedBody = substitute(f.getBody(), param, new Variable(newParam));
                 return new Function(new Variable(newParam), substitute(renamedBody, paramName, arg));

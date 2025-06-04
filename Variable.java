@@ -1,3 +1,5 @@
+// Vivian Oh and Mia Subrahmanyam
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,7 +35,6 @@ public class Variable implements Expression {
         return vars;
     }
 
-    // Equals and hashCode help avoid issues in Sets and Maps
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
